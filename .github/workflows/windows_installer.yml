@@ -1,0 +1,35 @@
+name: windows_installer
+on: [workflow_dispatch]
+
+jobs:
+  msys2-mingw64:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: git mingw-w64-x86_64-toolchain mingw-w64-x86_64-go mingw-w64-x86_64-libvpx
+      - name: CI-Build
+        run: |
+          echo 'Running in MSYS2!'
+          ./windows_build.sh
+          pwd
+          ls app
+      - name: Compile .ISS to .EXE Installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: 'setup.iss'
+          options: /O+
+      - name: List
+        run: |
+          ls app
+      - name: Upload Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: Output/WebRTCRemoteDesktopInstaller.exe
