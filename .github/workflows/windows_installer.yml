@@ -2,7 +2,7 @@ name: windows_installer
 on: [workflow_dispatch]
 
 jobs:
-  msys2-mingw64:
+  executable_build:
     runs-on: windows-latest
     defaults:
       run:
@@ -13,21 +13,46 @@ jobs:
         with:
           msystem: MINGW64
           update: true
-          install: git mingw-w64-x86_64-toolchain mingw-w64-x86_64-go mingw-w64-x86_64-libvpx
+          install: mingw-w64-x86_64-toolchain mingw-w64-x86_64-go mingw-w64-x86_64-libvpx
       - name: CI-Build
         run: |
           echo 'Running in MSYS2!'
-          ./windows_build.sh
-          pwd
-          ls app
+          go mod tidy
+          go build --tags vp8enc cmd/agent.go
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: executable
+          path: agent.exe
+
+  packaging:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download executable
+        uses: actions/download-artifact@v4
+        with:
+          name: executable
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: mingw-w64-x86_64-libvpx
+        run: |
+          echo 'Running in MSYS2!'
+          mkdir -p app
+          cp -r certs app/
+          cp -r web app/
+          cp -r /mingw64/bin/* app/
+          mv agent.exe app/WebRTCRemoteDesktop.exe
       - name: Compile .ISS to .EXE Installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
           path: 'setup.iss'
           options: /O+
-      - name: List
-        run: |
-          ls app
       - name: Upload Installer
         uses: actions/upload-artifact@v4
         with:

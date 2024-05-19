@@ -1,3 +1,6 @@
 agent
 agent.tar.gz
 agent.zip
+
+app/*
+.vscode
