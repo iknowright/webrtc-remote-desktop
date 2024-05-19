@@ -19,37 +19,11 @@ jobs:
           echo 'Running in MSYS2!'
           go mod tidy
           go build --tags vp8enc cmd/agent.go
-      - name: Upload executable
-        uses: actions/upload-artifact@v4
-        with:
-          name: executable
-          path: agent.exe
-
-  packaging:
-    runs-on: windows-latest
-    needs: executable_build
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download executable
-        uses: actions/download-artifact@v4
-        with:
-          name: executable
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: mingw-w64-x86_64-libvpx
-      - name: create library dependencies
-        run: |
-          echo 'Running in MSYS2!'
           mkdir -p app
           cp -r certs app/
           cp -r web app/
           cp -r /mingw64/bin/* app/
-          mv agent.exe app/agent.exe
+          mv agent.exe app/app.exe
       - name: Compile .ISS to .EXE Installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
