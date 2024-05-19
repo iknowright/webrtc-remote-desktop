@@ -49,7 +49,7 @@ jobs:
           cp -r certs app/
           cp -r web app/
           cp -r /mingw64/bin/* app/
-          mv agent.exe app/WebRTCRemoteDesktop.exe
+          mv agent.exe app/agent.exe
       - name: Compile .ISS to .EXE Installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
