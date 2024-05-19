@@ -41,6 +41,7 @@ jobs:
           msystem: MINGW64
           update: true
           install: mingw-w64-x86_64-libvpx
+      - name: create library dependencies
         run: |
           echo 'Running in MSYS2!'
           mkdir -p app
